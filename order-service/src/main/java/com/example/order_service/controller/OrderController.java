@@ -23,16 +23,16 @@ public class OrderController {
         return "OrderController is working!";
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<Order> createOrder(@RequestBody Order order){
-        Order savedOrder = orderService.createOrder(order);
-        return ResponseEntity.ok(savedOrder);
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Order>> getUserOrders(@PathVariable Long userId){
-        return ResponseEntity.ok(orderService.getOrdersByUser(userId));
-    }
+//    @PostMapping("/create")
+//    public ResponseEntity<Order> createOrder(@RequestBody Order order){
+//        Order savedOrder = orderService.createOrder(order);
+//        return ResponseEntity.ok(savedOrder);
+//    }
+//
+//    @GetMapping("/user/{userId}")
+//    public ResponseEntity<List<Order>> getUserOrders(@PathVariable Long userId){
+//        return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+//    }
 
 
 

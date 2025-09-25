@@ -19,6 +19,11 @@ public class ProductController {
     private ProductService productService;
 
 
+    @GetMapping("getProduct/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable long id){
+        Product product = productService.getById(id);
+        return ResponseEntity.ok(product);
+    }
 
 
     @GetMapping("/getAll")
@@ -63,6 +68,8 @@ public class ProductController {
 
 
     }
+
+
 
 
 
