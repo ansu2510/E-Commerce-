@@ -4,8 +4,23 @@
     <nav class="bg-white shadow p-4 flex justify-between">
       <h1 class="text-xl font-bold text-blue-600">My E-Commerce</h1>
       <div class="space-x-4">
-        <router-link to="/login" class="text-gray-700 hover:text-blue-500">Login</router-link>
-        <router-link to="/register" class="text-gray-700 hover:text-blue-500">Register</router-link>
+        <!-- Conditionally render links -->
+        <template v-if="$route.path === '/dashboard'">
+          <button 
+            class="text-gray-700 hover:text-red-500" 
+            @click="logout"
+          >
+            Logout
+          </button>
+        </template>
+        <template v-else>
+          <router-link to="/login" class="text-gray-700 hover:text-blue-500">
+            Login
+          </router-link>
+          <router-link to="/register" class="text-gray-700 hover:text-blue-500">
+            Register
+          </router-link>
+        </template>
       </div>
     </nav>
 
@@ -17,9 +32,12 @@
 </template>
 
 <script setup>
-// No need to import HelloWorld anymore
-</script>
+import { useRouter } from "vue-router";
 
-<style>
-/* You can keep global styles here */
-</style>
+const router = useRouter();
+
+const logout = () => {
+  localStorage.removeItem("token"); // clear auth token
+  router.push("/login"); // redirect back to login
+};
+</script>

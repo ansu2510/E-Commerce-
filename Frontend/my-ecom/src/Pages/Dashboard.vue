@@ -49,6 +49,7 @@
           <p>{{ cart.length }}</p>
           <button
             class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+            @click="showCartModal = true"
           >
             Cart
           </button>
@@ -116,54 +117,162 @@
         </div>
       </section>
     </div>
+
+    <!-- 🛒 Cart Modal -->
+<div
+  v-if="showCartModal"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+>
+  <div class="bg-white w-96 rounded-lg shadow-lg p-6 relative">
+    <!-- Close Button -->
+    <button
+      class="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+      @click="showCartModal = false"
+    >
+      ✖
+    </button>
+
+    <h2 class="text-2xl font-bold mb-4">Your Cart</h2>
+
+    <div v-if="cart.length > 0" class="space-y-4">
+      <div
+        v-for="item in cart"
+        :key="item.id"
+        class="flex justify-between items-center border-b pb-2"
+      >
+        <div>
+          <h3 class="font-semibold">{{ item.name }}</h3>
+          <p class="text-sm text-gray-500">
+            Qty: {{ item.quantity }} × ${{ item.price }}
+          </p>
+        </div>
+        <p class="font-bold text-blue-600">${{ item.totalPrice }}</p>
+      </div>
+
+      <div class="mt-4 flex justify-between font-bold text-lg">
+        <span>Total:</span>
+        <span>
+          ${{ cart.reduce((acc, item) => acc + item.totalPrice, 0) }}
+        </span>
+      </div>
+
+      <button
+        class="w-full mt-4 bg-green-500 text-white py-2 rounded hover:bg-green-600 transition"
+      >
+        Checkout
+      </button>
+    </div>
+
+    <p v-else class="text-center text-gray-500">Your cart is empty</p>
+  </div>
+</div>
+
   </div>
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
-import api from "../services/api.js"; // Make sure this path is correct
+import { useRouter } from "vue-router"; // Add this import
+import api from "../services/api.js";
+import { jwtDecode } from "jwt-decode";
 
-// Reactive variable to store products
+
+const router = useRouter(); // Initialize router
 const products = ref([]);
 const cart = ref([]);
+const username = ref("User"); // Add this since you're using it in template
+const showCartModal = ref(false); // <-- for modal open/close
+
 
 // Fetch all products from backend
 const getAllProducts = async () => {
   try {
     const response = await api.get("http://localhost:8082/product/getAll");
-    products.value = response.data; // Store the data in reactive variable
-    console.log(products);
+    products.value = response.data;
+    console.log("Products:", products);
+    console.log("ProductsValue:", products.value);
   } catch (error) {
     console.log("Error fetching products:", error);
   }
 };
 
-const addToCart = (productId) => {
-  if (!cart.value.includes(productId)) {
-    cart.value.push(productId);
-    console.log("Cart:", cart.value);
-  } else {
-    console.log("product already added");
+
+const getUserIdFromToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return null;
+
+  try {
+    const decoded = jwtDecode(token);
+    console.log("Decoded token:", decoded);
+    return decoded.userId;  // 👈 depends on what backend put inside
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
   }
 };
 
+
+// Find product by ID
+const findProductById = (productId) => {
+  return products.value.find(product => product.id === productId);
+};
+
+
+
+// Add full product to cart
+const addToCart = (productId) => {
+  try {
+    const product = findProductById(productId);
+    console.log("here is the added product:" , product);
+    
+    if (!product) {
+      console.error("Product not found:", productId);
+      return;
+    }
+
+    // Check if product already exists in cart
+    const existingItem = cart.value.find(item => item.id === productId);
+    
+    if (!existingItem) {
+      // Add new product with quantity
+      const cartItem = {
+        ...product,
+        quantity: 1,
+        totalPrice: product.price
+      };
+      cart.value.push(cartItem);
+      console.log("Product added to cart:", cartItem);
+    } else {
+      // Increase quantity if already in cart
+      existingItem.quantity += 1;
+      existingItem.totalPrice = existingItem.price * existingItem.quantity;
+      console.log("Quantity increased for:", product.name);
+    }
+    
+    console.log("Updated cart:", cart.value);
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+  }
+};
+
+
+
+const printcartvalue = () => {
+  console.log("Cart contents:", cart.value);
+  console.log("Cart length:", cart.value.length);
+  console.log("Cart array:", [...cart.value]); // Alternative way to log
+}
+
 const logout = () => {
-  // Remove the token from localStorage
   localStorage.removeItem("token");
-
-  // Optionally, remove other user info if stored
-  // localStorage.removeItem("user"); // if you saved user details
-
-  // Redirect to login page
   router.push("/");
 };
 
-// Call the function when component mounts
 onMounted(() => {
   getAllProducts();
+  getUserIdFromToken();
 });
 </script>
-
 <style>
 /* Optional: use Google Material Icons */
 @import url("https://fonts.googleapis.com/icon?family=Material+Icons");
