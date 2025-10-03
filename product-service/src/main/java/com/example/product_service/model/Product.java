@@ -25,6 +25,7 @@ public class Product {
 
     private String name;
     private String description;
+    private String path;
     private double price;
     private int stock;
 
