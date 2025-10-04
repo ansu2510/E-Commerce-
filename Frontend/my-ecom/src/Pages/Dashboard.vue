@@ -158,6 +158,7 @@
 
       <button
         class="w-full mt-4 bg-green-500 text-white py-2 rounded hover:bg-green-600 transition"
+        @click="goToCheckout"
       >
         Checkout
       </button>
@@ -215,6 +216,10 @@ const getUserIdFromToken = () => {
 // Find product by ID
 const findProductById = (productId) => {
   return products.value.find(product => product.id === productId);
+};
+
+const goToCheckout = () => {
+  router.push("/checkout");
 };
 
 

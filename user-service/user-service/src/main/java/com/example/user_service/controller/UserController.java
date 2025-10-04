@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -25,6 +25,12 @@ public class UserController {
     private JwtUtil jwtUtil;
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    @GetMapping("/test")
+    public String test() {
+        return "UserController is working!";
+    }
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody User user) {

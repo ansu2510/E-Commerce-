@@ -125,7 +125,6 @@ import { ref } from "vue";
 import api from "../services/api.js";
 import { useRouter } from "vue-router";
 
-
 const router = useRouter();
 
 const username = ref("");
@@ -134,12 +133,15 @@ const password = ref("");
 
 const register = async () => {
   try {
-    const response = await api.post("http://localhost:8081/users/signup", {
-      name: username.value,
-      email: email.value,
-      password: password.value,
-      role: "CUSTOMER",
-    });
+    const response = await api.post(
+      "http://localhost:8080/user-service/users/signup",
+      {
+        name: username.value,
+        email: email.value,
+        password: password.value,
+        role: "CUSTOMER",
+      }
+    );
 
     console.log("Full response:", response.data);
 

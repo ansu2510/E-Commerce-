@@ -21,6 +21,13 @@ public class ProductController {
     private ProductService productService;
 
 
+    @GetMapping("/test")
+    public String test() {
+        return "ProductController is working!";
+    }
+
+
+
     @GetMapping("getProduct/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable long id){
         Product product = productService.getById(id);

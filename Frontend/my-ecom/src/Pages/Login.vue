@@ -80,10 +80,14 @@ const password = ref("");
 
 const login = async () => {
   try {
-    const response = await api.post("http://localhost:8081/users/login", {
-      email: email.value,
-      password: password.value,
-    });
+    const response = await api.post(
+      "http://localhost:8080/user-service/users/login",
+      {
+        email: email.value,
+        password: password.value,
+      }
+    );
+    console.log("here is the response",response);
     localStorage.setItem("token", response.data.token);
     alert("Login successful!");
     router.push("/dashboard");

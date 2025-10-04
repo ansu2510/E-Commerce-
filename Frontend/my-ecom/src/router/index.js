@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Login from "../Pages/Login.vue";
 import Register from "../Pages/Register.vue";
 import Dashboard from "../Pages/Dashboard.vue";
+import Checkout from "../Pages/checkout.vue";
 
 
 const routes = [
@@ -9,6 +10,7 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/", redirect: "/login" }, // default redirect
   { path: "/dashboard", component: Dashboard , meta: { requiresAuth: true }}, 
+  { path: "/checkout", component: Checkout },
 ];
 
 const router = createRouter({
