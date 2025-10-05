@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,15 +23,29 @@ public class OrderService {
     private ProductInterface productInterface;
 
     //    private OrderRepository orderRepository;
+//    public Order createOrder(Order order){
+//        for (OrderItem item : order.getItems()) {
+//            long productId = item.getProductId();
+//            int quantity = item.getQuantity();
+//
+//            Map<String , Integer>request = Map.of("quantity" , quantity);
+//
+//            productInterface.updateProduct(productId , request);
+//        }
+//        order.setOrderDate(LocalDateTime.now());
+//        order.setStatus("PENDING");
+//        return orderRepository.save(order);
+//    }
+
+
     public Order createOrder(Order order){
+        List<Map<String, Integer>> updates = new ArrayList<>();
         for (OrderItem item : order.getItems()) {
-            long productId = item.getProductId();
-            int quantity = item.getQuantity();
-
-            Map<String , Integer>request = Map.of("quantity" , quantity);
-
-            productInterface.updateProduct(productId , request);
+            updates.add(Map.of( "id", item.getProductId().intValue(), "quantity", item.getQuantity()));
         }
+
+        productInterface.stockupdate(updates);
+
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
         return orderRepository.save(order);

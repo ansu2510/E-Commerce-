@@ -17,8 +17,8 @@ public interface ProductInterface {
     @GetMapping("product/getProduct/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable long id);
 
-    @PutMapping("product/productID/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable("id") long id , @RequestBody Map<String, Integer> request);
+    @PutMapping("product/stockupdate")
+    public ResponseEntity<?> stockupdate(@RequestBody List<Map<String,Integer>> updates);
 
 
 }

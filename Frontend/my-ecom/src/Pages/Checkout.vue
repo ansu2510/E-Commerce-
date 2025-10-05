@@ -17,7 +17,7 @@
 
       <div class="flex justify-between text-lg font-bold mb-6">
         <span>Total:</span>
-        <span>₹{{ totalPrice }}</span>
+        <span>₹{{ formattedTotal }}</span>
       </div>
 
       <button
@@ -32,20 +32,26 @@
 
 <script setup>
 import { computed } from "vue";
-import { useRouter } from "vue-router";
-
-// Example: cart data from localStorage
-const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-
-const totalPrice = computed(() =>
-  cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-);
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
+const route = useRoute(); // ✅ this is the current route
+
+// Load cart items (if you stored them in localStorage)
+const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+
+const total = computed(() => {
+  const raw = route.query.total; // ✅ use route, not router
+  const s = Array.isArray(raw) ? raw[0] : raw; // handle possible array
+  return parseFloat(s ?? "0");
+});
+
+const formattedTotal = computed(() => total.value.toFixed(2));
 
 const placeOrder = () => {
   alert("Order placed successfully!");
   localStorage.removeItem("cart");
-  router.push("/"); // redirect to home after order
+  router.push("/"); // redirect to home
 };
 </script>
+

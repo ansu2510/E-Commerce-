@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/product")
 public class ProductController {
@@ -57,42 +57,61 @@ public class ProductController {
         return ResponseEntity.ok("Product deleted successfully");
     }
 
-    @PutMapping("/productID/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable("id") long id , @RequestBody Map<String, Integer> request) {
+//    @PutMapping("/productID/{id}")
+//    public ResponseEntity<?> updateProduct(@PathVariable("id") long id , @RequestBody Map<String, Integer> request) {
+//
+//        long start = System.currentTimeMillis();
+//
+//        int quantity = request.get("quantity");
+//
+//        if (!productService.existsById(id)) {
+//            return ResponseEntity.status(404)
+//                    .body(Map.of("error", "Product not found with id " + id));
+//        }
+//
+//        Product product = productService.getById(id);
+//
+//        if (product.getStock() <= 0) {
+//            return ResponseEntity.status(400).body("Sorry Product out of stock");
+//        }
+//
+//        product.setStock(product.getStock() - quantity);
+//
+//        Product updatedProduct = productService.saveProduct(product);
+//
+//        long end = System.currentTimeMillis();
+//        System.out.println("updateProduct for id={} took {} ms" + id + (end - start));
+////        log.info("updateProduct for id={} took {} ms", id, (end - start));
+//
+//
+//        return ResponseEntity.ok(Map.of(
+//                "message", "Stock updated successfully",
+//                "productId", id,
+//                "remainingStock", product.getStock()
+//        ));
+//
+//    }
 
-        int quantity = request.get("quantity");
+    @PutMapping("/stockupdate")
+    public ResponseEntity<?> stockupdate(@RequestBody List<Map<String,Integer>> updates){
 
-        if (!productService.existsById(id)) {
-            return ResponseEntity.status(404)
-                    .body(Map.of("error", "Product not found with id " + id));
+        for (Map<String, Integer> req : updates) {
+            long id = req.get("id");
+            int qty = req.get("quantity");
+
+            Product product = productService.getById(id);
+            if (product.getStock() < qty) {
+                return ResponseEntity.status(400).body("Not enough stock for product " + id);
+            }
+            product.setStock(product.getStock() - qty);
+            productService.saveProduct(product);
         }
 
-        Product product = productService.getById(id);
+        return ResponseEntity.ok(Map.of("message", "Stock updated successfully"));
 
-        if (product.getStock() <= 0) {
-            return ResponseEntity.status(400).body("Sorry Product out of stock");
-        }
 
-        product.setStock(product.getStock() - quantity);
 
-        Product updatedProduct = productService.saveProduct(product);
-
-        return ResponseEntity.ok(updatedProduct);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

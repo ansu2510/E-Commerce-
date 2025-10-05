@@ -3,22 +3,21 @@ import Login from "../Pages/Login.vue";
 import Register from "../Pages/Register.vue";
 import Dashboard from "../Pages/Dashboard.vue";
 import Checkout from "../Pages/checkout.vue";
-
+import Home from "../Pages/Home.vue";
 
 const routes = [
   { path: "/login", component: Login },
   { path: "/register", component: Register },
-  { path: "/", redirect: "/login" }, // default redirect
-  { path: "/dashboard", component: Dashboard , meta: { requiresAuth: true }}, 
-  { path: "/checkout", component: Checkout },
+  { path: "/home", component: Home },
+  { path: "/", redirect: "/Home" }, // default redirect
+  { path: "/dashboard", component: Dashboard, meta: { requiresAuth: true } },
+  { path: "/checkout", component: Checkout, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
-
-
 
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");

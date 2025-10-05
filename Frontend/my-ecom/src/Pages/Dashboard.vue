@@ -219,7 +219,9 @@ const findProductById = (productId) => {
 };
 
 const goToCheckout = () => {
-  router.push("/checkout");
+  const total = cart.value.reduce((acc, item) => acc + item.totalPrice, 0);
+  // push total as a query param (string)
+  router.push({ path: "/checkout", query: { total: total.toFixed(2) } });
 };
 
 
