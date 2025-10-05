@@ -89,6 +89,7 @@ const login = async () => {
     );
     console.log("here is the response",response);
     localStorage.setItem("token", response.data.token);
+    localStorage.setItem("userId" , response.data.userId);
     alert("Login successful!");
     router.push("/dashboard");
   } catch (err) {

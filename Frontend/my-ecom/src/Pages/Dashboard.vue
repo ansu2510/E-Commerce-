@@ -119,55 +119,54 @@
     </div>
 
     <!-- 🛒 Cart Modal -->
-<div
-  v-if="showCartModal"
-  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
->
-  <div class="bg-white w-96 rounded-lg shadow-lg p-6 relative">
-    <!-- Close Button -->
-    <button
-      class="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
-      @click="showCartModal = false"
+    <div
+      v-if="showCartModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      ✖
-    </button>
+      <div class="bg-white w-96 rounded-lg shadow-lg p-6 relative">
+        <!-- Close Button -->
+        <button
+          class="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+          @click="showCartModal = false"
+        >
+          ✖
+        </button>
 
-    <h2 class="text-2xl font-bold mb-4">Your Cart</h2>
+        <h2 class="text-2xl font-bold mb-4">Your Cart</h2>
 
-    <div v-if="cart.length > 0" class="space-y-4">
-      <div
-        v-for="item in cart"
-        :key="item.id"
-        class="flex justify-between items-center border-b pb-2"
-      >
-        <div>
-          <h3 class="font-semibold">{{ item.name }}</h3>
-          <p class="text-sm text-gray-500">
-            Qty: {{ item.quantity }} × ${{ item.price }}
-          </p>
+        <div v-if="cart.length > 0" class="space-y-4">
+          <div
+            v-for="item in cart"
+            :key="item.id"
+            class="flex justify-between items-center border-b pb-2"
+          >
+            <div>
+              <h3 class="font-semibold">{{ item.name }}</h3>
+              <p class="text-sm text-gray-500">
+                Qty: {{ item.quantity }} × ${{ item.price }}
+              </p>
+            </div>
+            <p class="font-bold text-blue-600">${{ item.totalPrice }}</p>
+          </div>
+
+          <div class="mt-4 flex justify-between font-bold text-lg">
+            <span>Total:</span>
+            <span>
+              ${{ cart.reduce((acc, item) => acc + item.totalPrice, 0) }}
+            </span>
+          </div>
+
+          <button
+            class="w-full mt-4 bg-green-500 text-white py-2 rounded hover:bg-green-600 transition"
+            @click="goToCheckout"
+          >
+            Checkout
+          </button>
         </div>
-        <p class="font-bold text-blue-600">${{ item.totalPrice }}</p>
-      </div>
 
-      <div class="mt-4 flex justify-between font-bold text-lg">
-        <span>Total:</span>
-        <span>
-          ${{ cart.reduce((acc, item) => acc + item.totalPrice, 0) }}
-        </span>
+        <p v-else class="text-center text-gray-500">Your cart is empty</p>
       </div>
-
-      <button
-        class="w-full mt-4 bg-green-500 text-white py-2 rounded hover:bg-green-600 transition"
-        @click="goToCheckout"
-      >
-        Checkout
-      </button>
     </div>
-
-    <p v-else class="text-center text-gray-500">Your cart is empty</p>
-  </div>
-</div>
-
   </div>
 </template>
 
@@ -176,7 +175,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router"; // Add this import
 import api from "../services/api.js";
 import { jwtDecode } from "jwt-decode";
-
+import { watch } from "vue";
 
 const router = useRouter(); // Initialize router
 const products = ref([]);
@@ -184,11 +183,19 @@ const cart = ref([]);
 const username = ref("User"); // Add this since you're using it in template
 const showCartModal = ref(false); // <-- for modal open/close
 
-
 // Fetch all products from backend
+
+
+
+watch(cart, (newCart) => {
+  localStorage.setItem("cart", JSON.stringify(newCart));
+}, { deep: true });
+
 const getAllProducts = async () => {
   try {
-    const response = await api.get("http://localhost:8082/product/getAll");
+    const response = await api.get(
+      "http://localhost:8080/product-service/product/getAll"
+    );
     products.value = response.data;
     console.log("Products:", products);
     console.log("ProductsValue:", products.value);
@@ -197,7 +204,6 @@ const getAllProducts = async () => {
   }
 };
 
-
 const getUserIdFromToken = () => {
   const token = localStorage.getItem("token");
   if (!token) return null;
@@ -205,17 +211,16 @@ const getUserIdFromToken = () => {
   try {
     const decoded = jwtDecode(token);
     console.log("Decoded token:", decoded);
-    return decoded.userId;  // 👈 depends on what backend put inside
+    return decoded.userId; // 👈 depends on what backend put inside
   } catch (error) {
     console.error("Error decoding token:", error);
     return null;
   }
 };
 
-
 // Find product by ID
 const findProductById = (productId) => {
-  return products.value.find(product => product.id === productId);
+  return products.value.find((product) => product.id === productId);
 };
 
 const goToCheckout = () => {
@@ -224,28 +229,26 @@ const goToCheckout = () => {
   router.push({ path: "/checkout", query: { total: total.toFixed(2) } });
 };
 
-
-
 // Add full product to cart
 const addToCart = (productId) => {
   try {
     const product = findProductById(productId);
-    console.log("here is the added product:" , product);
-    
+    console.log("here is the added product:", product);
+
     if (!product) {
       console.error("Product not found:", productId);
       return;
     }
 
     // Check if product already exists in cart
-    const existingItem = cart.value.find(item => item.id === productId);
-    
+    const existingItem = cart.value.find((item) => item.id === productId);
+
     if (!existingItem) {
       // Add new product with quantity
       const cartItem = {
         ...product,
         quantity: 1,
-        totalPrice: product.price
+        totalPrice: product.price,
       };
       cart.value.push(cartItem);
       console.log("Product added to cart:", cartItem);
@@ -255,25 +258,28 @@ const addToCart = (productId) => {
       existingItem.totalPrice = existingItem.price * existingItem.quantity;
       console.log("Quantity increased for:", product.name);
     }
-    
+
     console.log("Updated cart:", cart.value);
   } catch (error) {
     console.error("Error adding to cart:", error);
   }
 };
 
-
-
-const printcartvalue = () => {
-  console.log("Cart contents:", cart.value);
-  console.log("Cart length:", cart.value.length);
-  console.log("Cart array:", [...cart.value]); // Alternative way to log
-}
+// const printcartvalue = () => {
+//   console.log("Cart contents:", cart.value);
+//   console.log("Cart length:", cart.value.length);
+//   console.log("Cart array:", [...cart.value]); // Alternative way to log
+// };
 
 const logout = () => {
   localStorage.removeItem("token");
   router.push("/");
 };
+
+// const storeCart = () => {
+//   localStorage.setItem("cart", JSON.stringify(cart.value));
+//   console.log("Cart stored:", cart.value);
+// };
 
 onMounted(() => {
   getAllProducts();

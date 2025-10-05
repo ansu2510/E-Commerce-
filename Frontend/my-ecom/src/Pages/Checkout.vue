@@ -6,7 +6,7 @@
       <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
       <ul class="divide-y divide-gray-200 mb-4">
         <li
-          v-for="item in cartItems"
+          v-for="item in cart"
           :key="item.id"
           class="flex justify-between py-2"
         >
@@ -33,12 +33,13 @@
 <script setup>
 import { computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import api from "../services/api.js";
 
 const router = useRouter();
 const route = useRoute(); // ✅ this is the current route
 
 // Load cart items (if you stored them in localStorage)
-const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+const cart = JSON.parse(localStorage.getItem("cart") || "[]");
 
 const total = computed(() => {
   const raw = route.query.total; // ✅ use route, not router
@@ -48,10 +49,28 @@ const total = computed(() => {
 
 const formattedTotal = computed(() => total.value.toFixed(2));
 
-const placeOrder = () => {
-  alert("Order placed successfully!");
-  localStorage.removeItem("cart");
-  router.push("/"); // redirect to home
+const orderItems = cart.map((item) => ({
+  productId: item.id,
+  quantity: item.quantity || 1, // fallback if no quantity stored
+}));
+
+const payload = {
+  userId: localStorage.getItem("userId"),
+  totalAmount: total.value, 
+  items: orderItems,
+};
+
+const placeOrder = async () => {
+  try {
+    console.log("here is the payload:" , payload);
+    const response = await api.post(
+      "http://localhost:8080/order-service/order/create",
+      payload
+    );
+    alert("Order placed successfully!");
+    router.push("/dashboard"); // redirect to home
+  } catch (error) {
+    console.log("Error Message:", error);
+  }
 };
 </script>
-
